@@ -8,7 +8,9 @@ import com.expensetracker.service.UserService;
 
 import jakarta.validation.Valid;
 
+import com.expensetracker.dto.request.LoginRequest;
 import com.expensetracker.dto.request.RegisterRequest;
+import com.expensetracker.dto.response.LoginResponse;
 import com.expensetracker.dto.response.UserResponse;
 
 @RestController
@@ -26,5 +28,13 @@ public class UserController {
         UserResponse response = userService.registerUser(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> loginUser(@Valid @RequestBody LoginRequest request){
+        LoginResponse response = userService.loginUser(request);
+
+        return ResponseEntity.ok(response);
+    }
+
 
 }

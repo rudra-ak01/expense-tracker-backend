@@ -1,11 +1,16 @@
 package com.expensetracker.service.impl;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.expensetracker.dto.request.LoginRequest;
 import com.expensetracker.dto.request.RegisterRequest;
+import com.expensetracker.dto.response.LoginResponse;
 import com.expensetracker.dto.response.UserResponse;
 import com.expensetracker.entity.User;
+import com.expensetracker.exception.InvalidCredentialsException;
 import com.expensetracker.exception.ResourceAlreadyExistsException;
+import com.expensetracker.exception.UserNotFoundException;
 import com.expensetracker.repository.UserRepository;
 import com.expensetracker.service.UserService;
 
@@ -13,9 +18,14 @@ import com.expensetracker.service.UserService;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(
+            UserRepository userRepository,
+            BCryptPasswordEncoder passwordEncoder) {
+
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -28,7 +38,7 @@ public class UserServiceImpl implements UserService {
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
-                .password(request.getPassword())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .build();
 
         User savedUser = userRepository.save(user);
@@ -38,5 +48,20 @@ public class UserServiceImpl implements UserService {
                 .username(savedUser.getUsername())
                 .email(savedUser.getEmail())
                 .build();
+    }
+
+    @Override
+    public LoginResponse loginUser(LoginRequest request) {
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        boolean passwordMatches = passwordEncoder.matches(request.getPassword(), user.getPassword());
+
+        if (!passwordMatches) {
+            throw new InvalidCredentialsException("Invalid Credentials");
+        }
+
+        return LoginResponse.builder().message("login successful").email(user.getEmail()).build();
     }
 }
