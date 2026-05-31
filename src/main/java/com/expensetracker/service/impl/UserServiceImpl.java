@@ -12,6 +12,7 @@ import com.expensetracker.exception.InvalidCredentialsException;
 import com.expensetracker.exception.ResourceAlreadyExistsException;
 import com.expensetracker.exception.UserNotFoundException;
 import com.expensetracker.repository.UserRepository;
+import com.expensetracker.service.JwtService;
 import com.expensetracker.service.UserService;
 
 @Service
@@ -19,13 +20,16 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private JwtService jwtService;
 
     public UserServiceImpl(
             UserRepository userRepository,
-            BCryptPasswordEncoder passwordEncoder) {
+            BCryptPasswordEncoder passwordEncoder,
+            JwtService jwtService) {
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     @Override
@@ -62,6 +66,12 @@ public class UserServiceImpl implements UserService {
             throw new InvalidCredentialsException("Invalid Credentials");
         }
 
-        return LoginResponse.builder().message("login successful").email(user.getEmail()).build();
+        String token = jwtService.generateToken(user.getEmail());
+
+        return LoginResponse.builder()
+                .message("login successful")
+                .email(user.getEmail())
+                .token(token)
+                .build();
     }
 }
