@@ -1,13 +1,16 @@
 package com.expensetracker.service.impl;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.expensetracker.dto.request.LoginRequest;
 import com.expensetracker.dto.request.RegisterRequest;
 import com.expensetracker.dto.response.LoginResponse;
+import com.expensetracker.dto.response.ProfileResponse;
 import com.expensetracker.dto.response.UserResponse;
 import com.expensetracker.entity.User;
+import com.expensetracker.enums.Role;
 import com.expensetracker.exception.InvalidCredentialsException;
 import com.expensetracker.exception.ResourceAlreadyExistsException;
 import com.expensetracker.exception.UserNotFoundException;
@@ -43,6 +46,7 @@ public class UserServiceImpl implements UserService {
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .role(Role.USER)
                 .build();
 
         User savedUser = userRepository.save(user);
@@ -72,6 +76,25 @@ public class UserServiceImpl implements UserService {
                 .message("login successful")
                 .email(user.getEmail())
                 .token(token)
+                .build();
+    }
+
+    @Override
+    public ProfileResponse getProfile() {
+
+        String email = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        return ProfileResponse.builder()
+                .id(user.getId())
+                .name(user.getUsername())
+                .email(user.getEmail())
+                .role(user.getRole().name())
                 .build();
     }
 }

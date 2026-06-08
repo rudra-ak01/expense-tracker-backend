@@ -11,30 +11,42 @@ import jakarta.validation.Valid;
 import com.expensetracker.dto.request.LoginRequest;
 import com.expensetracker.dto.request.RegisterRequest;
 import com.expensetracker.dto.response.LoginResponse;
+import com.expensetracker.dto.response.ProfileResponse;
 import com.expensetracker.dto.response.UserResponse;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    
+
     private final UserService userService;
 
-    public UserController(UserService userService){
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody RegisterRequest request){
+    public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody RegisterRequest request) {
         UserResponse response = userService.registerUser(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> loginUser(@Valid @RequestBody LoginRequest request){
+    public ResponseEntity<LoginResponse> loginUser(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = userService.loginUser(request);
 
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/admin-test")
+    public String adminTest() {
+        return "Admin Access";
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<ProfileResponse> getProfile() {
+
+        return ResponseEntity.ok(
+                userService.getProfile());
+    }
 
 }
