@@ -21,80 +21,80 @@ import com.expensetracker.service.UserService;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
-    private JwtService jwtService;
+        private final UserRepository userRepository;
+        private final BCryptPasswordEncoder passwordEncoder;
+        private JwtService jwtService;
 
-    public UserServiceImpl(
-            UserRepository userRepository,
-            BCryptPasswordEncoder passwordEncoder,
-            JwtService jwtService) {
+        public UserServiceImpl(
+                        UserRepository userRepository,
+                        BCryptPasswordEncoder passwordEncoder,
+                        JwtService jwtService) {
 
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
-    }
-
-    @Override
-    public UserResponse registerUser(RegisterRequest request) {
-
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ResourceAlreadyExistsException("Email already exists");
+                this.userRepository = userRepository;
+                this.passwordEncoder = passwordEncoder;
+                this.jwtService = jwtService;
         }
 
-        User user = User.builder()
-                .username(request.getUsername())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER)
-                .build();
+        @Override
+        public UserResponse registerUser(RegisterRequest request) {
 
-        User savedUser = userRepository.save(user);
+                if (userRepository.existsByEmail(request.getEmail())) {
+                        throw new ResourceAlreadyExistsException("Email already exists");
+                }
 
-        return UserResponse.builder()
-                .id(savedUser.getId())
-                .username(savedUser.getUsername())
-                .email(savedUser.getEmail())
-                .build();
-    }
+                User user = User.builder()
+                                .username(request.getUsername())
+                                .email(request.getEmail())
+                                .password(passwordEncoder.encode(request.getPassword()))
+                                .role(Role.USER)
+                                .build();
 
-    @Override
-    public LoginResponse loginUser(LoginRequest request) {
+                User savedUser = userRepository.save(user);
 
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
-
-        boolean passwordMatches = passwordEncoder.matches(request.getPassword(), user.getPassword());
-
-        if (!passwordMatches) {
-            throw new InvalidCredentialsException("Invalid Credentials");
+                return UserResponse.builder()
+                                .id(savedUser.getId())
+                                .username(savedUser.getUsername())
+                                .email(savedUser.getEmail())
+                                .build();
         }
 
-        String token = jwtService.generateToken(user.getEmail());
+        @Override
+        public LoginResponse loginUser(LoginRequest request) {
 
-        return LoginResponse.builder()
-                .message("login successful")
-                .email(user.getEmail())
-                .token(token)
-                .build();
-    }
+                User user = userRepository.findByEmail(request.getEmail())
+                                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-    @Override
-    public ProfileResponse getProfile() {
+                boolean passwordMatches = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
-        String email = SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getName();
+                if (!passwordMatches) {
+                        throw new InvalidCredentialsException("Invalid Credentials");
+                }
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+                String token = jwtService.generateToken(user.getEmail());
 
-        return ProfileResponse.builder()
-                .id(user.getId())
-                .name(user.getUsername())
-                .email(user.getEmail())
-                .role(user.getRole().name())
-                .build();
-    }
+                return LoginResponse.builder()
+                                .message("login successful")
+                                .email(user.getEmail())
+                                .token(token)
+                                .build();
+        }
+
+        @Override
+        public ProfileResponse getProfile() {
+
+                String email = SecurityContextHolder
+                                .getContext()
+                                .getAuthentication()
+                                .getName();
+
+                User user = userRepository.findByEmail(email)
+                                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+                return ProfileResponse.builder()
+                                .id(user.getId())
+                                .name(user.getUsername())
+                                .email(user.getEmail())
+                                .role(user.getRole().name())
+                                .build();
+        }
 }
