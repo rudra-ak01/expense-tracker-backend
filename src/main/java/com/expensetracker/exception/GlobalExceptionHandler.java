@@ -58,5 +58,50 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
+    
+    @ExceptionHandler(TransactionNotFoundException.class)
+    
+    public ResponseEntity<Map<String, Object>> handleTransactionNotFoundException(TransactionNotFoundException ex){
+    
+        Map<String, Object> response = new HashMap<>();
+    
+        response.put("success", false);
+        response.put("message", ex.getMessage());
+    
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+    
+    @ExceptionHandler(DuplicateCategoryException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicateCategoryException(DuplicateCategoryException ex){
+    
+        Map<String, Object> response = new HashMap<>();
+    
+        response.put("success", false);
+        response.put("message", ex.getMessage());
+    
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+    
+    @ExceptionHandler(CategoryNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleCategoryNotFoundException(CategoryNotFoundException ex){
+    
+        Map<String, Object> response = new HashMap<>();
+    
+        response.put("success", false);
+        response.put("message", ex.getMessage());
+    
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+    
+    @ExceptionHandler(CategoryInUseException.class)
+    public ResponseEntity<Map<String, Object>> handleCategoryInUseException(CategoryInUseException ex){
+    
+        Map<String, Object> response = new HashMap<>();
+    
+        response.put("success", false);
+        response.put("message", ex.getMessage());
+    
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
 
 }
