@@ -3,6 +3,7 @@ package com.expensetracker.service.impl;
 import java.util.List;
 
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.expensetracker.dto.request.CategoryRequest;
@@ -18,11 +19,22 @@ import com.expensetracker.repository.TransactionRepository;
 import com.expensetracker.repository.UserRepository;
 import com.expensetracker.service.CategoryService;
 
+@Service
 public class CategoryServiceImpl implements CategoryService {
 
-        private CategoryRepository categoryRepository;
-        private UserRepository userRepository;
-        private TransactionRepository transactionRepository;
+        private final CategoryRepository categoryRepository;
+        private final UserRepository userRepository;
+        private final TransactionRepository transactionRepository;
+
+         public CategoryServiceImpl(
+            CategoryRepository categoryRepository,
+            UserRepository userRepository,
+            TransactionRepository transactionRepository) {
+
+        this.categoryRepository = categoryRepository;
+        this.userRepository = userRepository;
+        this.transactionRepository = transactionRepository;
+    }
 
         private User getCurrentUser() {
 
@@ -56,11 +68,7 @@ public class CategoryServiceImpl implements CategoryService {
                                 .build();
 
                 Category savedCategory = categoryRepository.save(category);
-                return CategoryResponse.builder()
-                                .id(savedCategory.getId())
-                                .name(savedCategory.getName())
-                                .description(savedCategory.getDescription())
-                                .build();
+                return mapToResponse(savedCategory);
         }
 
         @Override
@@ -71,11 +79,7 @@ public class CategoryServiceImpl implements CategoryService {
                 List<Category> categories = categoryRepository.findByUser(currentUser);
 
                 return categories.stream()
-                                .map(category -> CategoryResponse.builder()
-                                                .id(category.getId())
-                                                .name(category.getName())
-                                                .description(category.getDescription())
-                                                .build())
+                                .map(this::mapToResponse)
                                 .toList();
         }
 
@@ -94,11 +98,7 @@ public class CategoryServiceImpl implements CategoryService {
                 category.setName(categoryRequest.getName());
                 category.setDescription(categoryRequest.getDescription());
 
-                return CategoryResponse.builder()
-                                .id(category.getId())
-                                .description(category.getDescription())
-                                .name(category.getName())
-                                .build();
+                return mapToResponse(category);
         }
 
         @Override
@@ -114,6 +114,14 @@ public class CategoryServiceImpl implements CategoryService {
                 }
 
                 categoryRepository.delete(category);
+        }
+
+        private CategoryResponse mapToResponse(Category category){
+                return CategoryResponse.builder()
+                                .id(category.getId())
+                                .description(category.getDescription())
+                                .name(category.getName())
+                                .build();
         }
 
 }
