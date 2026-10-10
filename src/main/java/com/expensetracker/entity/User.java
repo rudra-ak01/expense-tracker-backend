@@ -1,5 +1,7 @@
 package com.expensetracker.entity;
 
+import java.util.List;
+
 import com.expensetracker.enums.Role;
 
 import jakarta.persistence.*;
@@ -27,5 +29,8 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToMany(mappedBy = "user")
+    private List<Transaction> transactions;
 
 }
