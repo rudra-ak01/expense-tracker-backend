@@ -1,17 +1,14 @@
 package com.expensetracker.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
+import com.expensetracker.enums.TransactionType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.expensetracker.dto.request.TransactionRequest;
 import com.expensetracker.dto.response.TransactionResponse;
@@ -38,8 +35,15 @@ public class TransactionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TransactionResponse>> getMyTransaction() {
-        return ResponseEntity.ok(transactionService.getMyTransaction());
+    public ResponseEntity<Page<TransactionResponse>> getMyTransactions(
+            @RequestParam(required = false) TransactionType type,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
+            Pageable pageable) {
+
+        return ResponseEntity.ok(
+                transactionService.getMyTransactions(
+                        type, startDate, endDate, pageable));
     }
 
     @PutMapping("/{id}")

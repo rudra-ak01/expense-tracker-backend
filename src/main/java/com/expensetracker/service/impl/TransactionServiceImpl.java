@@ -1,7 +1,14 @@
 package com.expensetracker.service.impl;
 
+import java.time.LocalDate;
 import java.util.List;
 
+import com.expensetracker.entity.Category;
+import com.expensetracker.enums.TransactionType;
+import com.expensetracker.exception.CategoryNotFoundException;
+import com.expensetracker.repository.CategoryRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +30,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         private final TransactionRepository transactionRepository;
         private final UserRepository userRepository;
+        private final CategoryRepository categoryRepository;
 
         private User getCurrentUser() {
 
@@ -42,15 +50,19 @@ public class TransactionServiceImpl implements TransactionService {
 
                 User currentUser = getCurrentUser();
 
+            Category category = categoryRepository
+                    .findByIdAndUser(request.getCategoryId(), currentUser)
+                    .orElseThrow(() ->
+                            new CategoryNotFoundException("Category not found"));
+
                 Transaction transaction = Transaction.builder()
                                 .title(request.getTitle())
                                 .amount(request.getAmount())
                                 .type(request.getType())
-                                .description(
-                                                request.getDescription())
-                                .transactionDate(
-                                                request.getTransactionDate())
+                                .description(request.getDescription())
+                                .transactionDate(request.getTransactionDate())
                                 .user(currentUser)
+                                .category(category)
                                 .build();
 
                 Transaction saved = transactionRepository.save(transaction);
@@ -58,23 +70,41 @@ public class TransactionServiceImpl implements TransactionService {
                 return mapToResponse(saved);
         }
 
-        @Override
-        public List<TransactionResponse> getMyTransaction() {
+    @Override
+    public Page<TransactionResponse> getMyTransactions(
+            TransactionType type,
+            LocalDate startDate,
+            LocalDate endDate,
+            Pageable pageable) {
 
-                User currentUser = getCurrentUser();
-
-                List<Transaction> transactions = transactionRepository.findByUser(currentUser);
-
-                return transactions.stream()
-                                .map(this::mapToResponse)
-                                .toList();
-
+        if (startDate != null && endDate != null
+                && startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException(
+                    "Start date must not be after end date");
         }
+
+        User currentUser = getCurrentUser();
+
+        Page<Transaction> transactions =
+                transactionRepository.searchTransactions(
+                        currentUser,
+                        type,
+                        startDate,
+                        endDate,
+                        pageable);
+
+        return transactions.map(this::mapToResponse);
+    }
 
         @Override
         public TransactionResponse updateTransaction(Long id, TransactionRequest request) {
 
                 User currentUser = getCurrentUser();
+
+            Category category = categoryRepository
+                    .findByIdAndUser(request.getCategoryId(), currentUser)
+                    .orElseThrow(() ->
+                            new CategoryNotFoundException("Category not found"));
 
                 Transaction transaction = transactionRepository
                                 .findByIdAndUser(id, currentUser)
@@ -86,6 +116,7 @@ public class TransactionServiceImpl implements TransactionService {
                 transaction.setType(request.getType());
                 transaction.setDescription(request.getDescription());
                 transaction.setTransactionDate(request.getTransactionDate());
+                transaction.setCategory(category);
                 Transaction updated = transactionRepository.save(transaction);
 
                 return mapToResponse(updated);
@@ -98,6 +129,8 @@ public class TransactionServiceImpl implements TransactionService {
                                 .amount(transaction.getAmount())
                                 .type(transaction.getType().name())
                                 .description(transaction.getDescription())
+                                .categoryId(transaction.getCategory().getId())
+                                .categoryName(transaction.getCategory().getName())
                                 .transactionDate(transaction.getTransactionDate())
                                 .build();
         }
