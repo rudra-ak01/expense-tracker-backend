@@ -35,28 +35,63 @@ public class UserServiceImpl implements UserService {
                 this.jwtService = jwtService;
         }
 
-        @Override
-        public UserResponse registerUser(RegisterRequest request) {
+        
+@Override
+public UserResponse registerUser(RegisterRequest request) {
 
-                if (userRepository.existsByEmail(request.getEmail())) {
-                        throw new ResourceAlreadyExistsException("Email already exists");
-                }
+    // 1. Check whether email is already registered
+    if (userRepository.existsByEmail(request.getEmail())) {
+        throw new ResourceAlreadyExistsException("Email already exists");
+    }
 
-                User user = User.builder()
-                                .username(request.getUsername())
-                                .email(request.getEmail())
-                                .password(passwordEncoder.encode(request.getPassword()))
-                                .role(Role.USER)
-                                .build();
+    // 2. Build user entity from registration request
+    User user = User.builder()
 
-                User savedUser = userRepository.save(user);
+            // Basic information
+            .username(request.getUsername())
+            .email(request.getEmail())
 
-                return UserResponse.builder()
-                                .id(savedUser.getId())
-                                .username(savedUser.getUsername())
-                                .email(savedUser.getEmail())
-                                .build();
-        }
+            // Always encrypt the password
+            .password(passwordEncoder.encode(request.getPassword()))
+
+            // Assign default role
+            .role(Role.USER)
+
+            // Personal information
+            .phoneNumber(request.getPhoneNumber())
+            .dateOfBirth(request.getDateOfBirth())
+            .gender(request.getGender())
+
+            // Address information
+            .address(request.getAddress())
+            .city(request.getCity())
+            .state(request.getState())
+            .country(request.getCountry())
+            .postalCode(request.getPostalCode())
+
+            // Financial preferences
+            .preferredCurrency(
+                request.getPreferredCurrency() == null ||
+                request.getPreferredCurrency().isBlank()
+                    ? "INR"
+                    : request.getPreferredCurrency().toUpperCase()
+            )
+            .occupation(request.getOccupation())
+            .monthlyIncome(request.getMonthlyIncome())
+
+            .build();
+
+    // 3. Save user in database
+    User savedUser = userRepository.save(user);
+
+    // 4. Return response
+    return UserResponse.builder()
+            .id(savedUser.getId())
+            .username(savedUser.getUsername())
+            .email(savedUser.getEmail())
+            .build();
+}
+
 
         @Override
         public LoginResponse loginUser(LoginRequest request) {
