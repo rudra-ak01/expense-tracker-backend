@@ -1,0 +1,138 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | ExpenseTracker</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="app-layout">
+
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    <main class="main-content">
+
+        <header class="topbar">
+            <div class="search-box">
+                <span>⌕</span>
+                <input type="search"
+                       placeholder="Search transactions, categories...">
+            </div>
+
+            <div class="profile-chip">
+                <div class="avatar">U</div>
+                <span>My Account</span>
+            </div>
+        </header>
+
+        <section class="page-heading">
+            <div>
+                <p class="eyebrow">YOUR FINANCES</p>
+                <h1>Welcome back 👋</h1>
+                <p class="subtitle">
+                    Here's an overview of your financial activity.
+                </p>
+            </div>
+
+            <span class="date-chip"
+                  th:text="${#temporals.format(
+                      T(java.time.LocalDate).now(), 'dd MMM yyyy')}">
+                20 Oct 2026
+            </span>
+        </section>
+
+        <section class="summary-grid">
+
+            <article class="summary-card">
+                <div class="card-top">
+                    <span class="card-label">Total Income</span>
+                    <span class="metric-icon income-icon">↗</span>
+                </div>
+                <h2>₹0.00</h2>
+                <p class="metric-note">Your recorded income</p>
+            </article>
+
+            <article class="summary-card">
+                <div class="card-top">
+                    <span class="card-label">Total Expenses</span>
+                    <span class="metric-icon expense-icon">↘</span>
+                </div>
+                <h2>₹0.00</h2>
+                <p class="metric-note">Your recorded expenses</p>
+            </article>
+
+            <article class="summary-card balance-card">
+                <div class="card-top">
+                    <span class="card-label">Current Balance</span>
+                    <span class="metric-icon balance-icon">₹</span>
+                </div>
+                <h2>₹0.00</h2>
+                <p class="metric-note">Income minus expenses</p>
+            </article>
+
+        </section>
+
+        <section class="content-grid">
+
+            <article class="panel spending-panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Spending Overview</h3>
+                        <p class="subtitle">
+                            Understand where your money goes.
+                        </p>
+                    </div>
+                    <span class="panel-badge">Overview</span>
+                </div>
+
+                <div class="empty-state">
+                    <div class="empty-icon">◌</div>
+                    <h4>Your financial story starts here</h4>
+                    <p>
+                        Add transactions to see your income and
+                        spending patterns.
+                    </p>
+                    <a class="primary-button"
+                       th:href="@{/transactions}">
+                        View Transactions
+                    </a>
+                </div>
+            </article>
+
+            <article class="panel quick-panel">
+                <h3>Quick Actions</h3>
+                <p class="subtitle">Manage your finances easily.</p>
+
+                <a class="action-button"
+                   th:href="@{/transactions}">
+                    <span>＋</span> Manage Transactions
+                </a>
+
+                <a class="action-button"
+                   th:href="@{/categories}">
+                    <span>▱</span> Manage Categories
+                </a>
+
+                <div class="tip-card">
+                    <span>✦</span>
+                    <div>
+                        <strong>A little tip</strong>
+                        <p>Review your spending regularly to stay on track.</p>
+                    </div>
+                </div>
+            </article>
+
+        </section>
+
+        <footer class="footer">
+            Built with care for better financial habits.
+        </footer>
+
+    </main>
+</div>
+
+</body>
+</html>

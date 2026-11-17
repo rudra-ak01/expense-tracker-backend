@@ -1,0 +1,44 @@
+<aside class="sidebar" th:fragment="sidebar" xmlns:th="http://www.w3.org/1999/xhtml">
+    <a class="brand" th:href="@{/dashboard}">
+        <span class="brand-icon">✦</span>
+        <span>
+            <strong>ExpenseTracker</strong>
+            <small>Track. Save. Build.</small>
+        </span>
+    </a>
+
+    <nav class="sidebar-nav">
+        <a th:href="@{/dashboard}"
+           th:classappend="${activePage == 'dashboard'} ? ' active' : ''">
+            <span class="nav-icon">▦</span>
+            Dashboard
+        </a>
+
+        <a th:href="@{/transactions}"
+           th:classappend="${activePage == 'transactions'} ? ' active' : ''">
+            <span class="nav-icon">↔</span>
+            Transactions
+        </a>
+
+        <a th:href="@{/categories}"
+           th:classappend="${activePage == 'categories'} ? ' active' : ''">
+            <span class="nav-icon">▱</span>
+            Categories
+        </a>
+
+        <a th:href="@{/profile}"
+           th:classappend="${activePage == 'profile'} ? ' active' : ''">
+            <span class="nav-icon">♙</span>
+            Profile
+        </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="logout-button">
+                <span class="nav-icon">↪</span>
+                Logout
+            </button>
+        </form>
+    </div>
+</aside>
